@@ -1,7 +1,7 @@
 using Dealership.Models;
 
 public interface IReceiptRepository {
-    List<Receipt> GetAllReceipts();
-    Receipt AddReceipt(Receipt receiptToAdd);
-    bool CheckIfSold(string VIN);
+    Task<List<Receipt>> GetAllReceiptsAsync();
+    Task AddReceiptAsync(Receipt receiptToAdd);
+    Task<bool> CheckIfSoldAsync(string VIN);
 }

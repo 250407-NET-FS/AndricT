@@ -1,8 +1,8 @@
 using Dealership.Models;
 
 public interface IServiceRepository {
-    List<Service> GetAllServices();
-    Service AddService(Service serviceToAdd);
-    List<Service> GetAllForVIN(string VIN);
-    List<Service> GetAllByEmployeeID(int employeeId);
+    Task<List<Service>> GetAllServicesAsync();
+    Task AddServiceAsync(Service serviceToAdd);
+    Task<List<Service>> GetAllForVINAsync(string VIN);
+    Task<List<Service>> GetAllByEmployeeIDAsync(int employeeId);
 }

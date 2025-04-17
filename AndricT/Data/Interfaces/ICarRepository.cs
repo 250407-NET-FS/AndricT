@@ -1,7 +1,7 @@
 using Dealership.Models;
 
 public interface ICarRepository {
-    List<Car> GetAllCars();
-    Car AddCar(Car carToAdd);
-    Car? GetByVIN(string VIN);
+    Task<List<Car>> GetAllCarsAsync();
+    Task AddCarAsync(Car carToAdd);
+    Task<Car?> GetByVINAsync(string VIN);
 }

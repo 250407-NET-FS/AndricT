@@ -1,9 +1,8 @@
 using Dealership.Models;
 
 public interface IEmployeeRepository {
-    List<Employee> GetAllEmployees();
-    Employee AddEmployee(Employee employeeToAdd);
-    Employee? GetByID(int id);
-    Employee? RemoveEmployee(int id);
-    List<Employee> GetAllEmployeesAt(int locationId);
+    Task<List<Employee>> GetAllEmployeesAsync();
+    Task AddEmployeeAsync(Employee employeeToAdd);
+    Task<Employee?> GetByIDAsync(int id);
+    Task<List<Employee>> GetAllEmployeesAtAsync(int locationId);
 }

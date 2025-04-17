@@ -1,5 +1,6 @@
 using Dealership.Models;
 
 public interface ISalesService {
-    Car MarkCarSold(string VIN, int customerId, int locationId, decimal sellingPrice);
+    Receipt MarkCarSold(string VIN, int customerId, string shipToCity, decimal sellingPrice);
+    Task<List<Car>> ListAllCars();
 }
