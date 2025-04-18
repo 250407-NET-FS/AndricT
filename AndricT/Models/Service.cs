@@ -11,6 +11,6 @@ public class Service {
     public int EmployeeID { get; set; }
     public DateTime Date { get; set; }
 
-    public virtual Car Car { get; set; }
-    public virtual Employee Employee { get; set; }
+    public Car Car;
+    public Employee Employee;
 }

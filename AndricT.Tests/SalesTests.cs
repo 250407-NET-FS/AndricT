@@ -1,6 +1,6 @@
 ﻿using Dealership.Models;
-using Dealership.Data;
 using Moq;
+using System.Threading.Tasks;
 
 namespace AndricT.Tests;
 
@@ -15,79 +15,99 @@ public class SalesTests
 
     private const string VALID_VIN = "4Y1SL65848Z411439";
     private const int VALID_CUST_ID = 1;
-    private const string VALID_CITY = "Tampa";
+    private const int VALID_LOCATION_ID = 2;
     private readonly Car _realCar = new Car() { VIN = VALID_VIN, Make = "Honda", Model = "Civic", Year = 2024 };
-    private readonly Customer _realCustomer = new Customer() { ID = VALID_CUST_ID };
-    private readonly Location _realLocation = new Location() { ID = 2, City = VALID_CITY };
+    private readonly Customer _realCustomer = new Customer() { CustomerID = VALID_CUST_ID };
+    private readonly Location _realLocation = new Location() { LocationID = 2, City = "Tampa" };
 
     public SalesTests() {
         salesService = new SalesService(_mockCarRepo.Object, _mockCustomerRepo.Object, _mockLocationRepo.Object, _mockReceiptRepo.Object, _mockShipmentRepo.Object);
     }
 
     [Fact]
-    public void MarkCarSold_Success_ExpectedBehavior()
+    public async Task MarkCarSold_Success_ExpectedBehavior() 
     {
-        Receipt expectedReceipt = new Receipt() { VIN = VALID_VIN, CustomerID = VALID_CUST_ID, PickupLocation = 2, SellingPrice = 0.99m };
+        _mockCarRepo.Setup(r => r.GetByVINAsync(VALID_VIN)).ReturnsAsync(_realCar);
+        _mockCustomerRepo.Setup(r => r.GetByIDAsync(VALID_CUST_ID)).ReturnsAsync(_realCustomer);
+        _mockLocationRepo.Setup(r => r.GetByIDAsync(VALID_LOCATION_ID)).ReturnsAsync(_realLocation);
+        _mockReceiptRepo.Setup(r => r.CheckIfSoldAsync(VALID_VIN)).ReturnsAsync(false);
+        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOfAsync(VALID_VIN)).ReturnsAsync(1);
 
-        _mockCarRepo.Setup(r => r.GetByVIN(VALID_VIN)).Returns(_realCar);
-        _mockCustomerRepo.Setup(r => r.GetByID(VALID_CUST_ID)).Returns(_realCustomer);
-        _mockLocationRepo.Setup(r => r.GetByCity(VALID_CITY)).Returns(_realLocation);
-        _mockReceiptRepo.Setup(r => r.CheckIfSold(VALID_VIN)).Returns(false);
-        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOf(VALID_VIN)).Returns(1);
+        Receipt receiptToAdd = new Receipt() { VIN = VALID_VIN, CustomerID = VALID_CUST_ID, PickupLocation = VALID_LOCATION_ID, SellingPrice = 0.99m };
 
-        var actualReceipt = salesService.MarkCarSold(VALID_VIN, VALID_CUST_ID, VALID_CITY, 0.99m);
-
-        Assert.NotNull(actualReceipt);
-        Assert.Equal(expectedReceipt.VIN, actualReceipt.VIN);
-        Assert.Equal(expectedReceipt.CustomerID, actualReceipt.CustomerID);
-        Assert.Equal(expectedReceipt.PickupLocation, actualReceipt.PickupLocation);
-        Assert.Equal(expectedReceipt.SellingPrice, actualReceipt.SellingPrice);
+        await salesService.MarkCarSold(receiptToAdd);
+        _mockReceiptRepo.Verify(r => r.AddReceiptAsync(receiptToAdd), Times.Once);
     }
 
     [Fact]
-    public void MarkCarSold_NonexistentVIN_ThrowsException()
+    public async Task MarkCarSold_NonexistentVIN_ThrowsException()
     {
-        _mockCustomerRepo.Setup(r => r.GetByID(VALID_CUST_ID)).Returns(_realCustomer);
-        _mockLocationRepo.Setup(r => r.GetByCity(VALID_CITY)).Returns(_realLocation);
+        _mockCustomerRepo.Setup(r => r.GetByIDAsync(VALID_CUST_ID)).ReturnsAsync(_realCustomer);
+        _mockLocationRepo.Setup(r => r.GetByIDAsync(VALID_LOCATION_ID)).ReturnsAsync(_realLocation);
 
-        var ex = Assert.Throws<Exception>(() => salesService.MarkCarSold("bad vin", VALID_CUST_ID, VALID_CITY, 0.99m));
+        Receipt receiptToAdd = new Receipt() { VIN = "bad vin", CustomerID = VALID_CUST_ID, PickupLocation = VALID_LOCATION_ID, SellingPrice = 0.99m };
+
+        var ex = await Assert.ThrowsAsync<Exception>(() => salesService.MarkCarSold(receiptToAdd));
+
         Assert.Equal("Car not found", ex.Message);
     }
 
     [Fact]
-    public void MarkCarSold_NonexistentCustID_ThrowsException()
+    public async Task MarkCarSold_NonexistentCustID_ThrowsException()
     {
-        _mockCarRepo.Setup(r => r.GetByVIN(VALID_VIN)).Returns(_realCar);
-        _mockLocationRepo.Setup(r => r.GetByCity(VALID_CITY)).Returns(_realLocation);
-        _mockReceiptRepo.Setup(r => r.CheckIfSold(VALID_VIN)).Returns(false);
-        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOf(VALID_VIN)).Returns(1);
+        _mockCarRepo.Setup(r => r.GetByVINAsync(VALID_VIN)).ReturnsAsync(_realCar);
+        _mockLocationRepo.Setup(r => r.GetByIDAsync(VALID_LOCATION_ID)).ReturnsAsync(_realLocation);
+        _mockReceiptRepo.Setup(r => r.CheckIfSoldAsync(VALID_VIN)).ReturnsAsync(false);
+        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOfAsync(VALID_VIN)).ReturnsAsync(1);
 
-        var ex = Assert.Throws<Exception>(() => salesService.MarkCarSold(VALID_VIN, 651651, VALID_CITY, 0.99m));
+        Receipt receiptToAdd = new Receipt() { VIN = VALID_VIN, CustomerID = 8008135, PickupLocation = VALID_LOCATION_ID, SellingPrice = 0.99m };
+        
+        var ex = await Assert.ThrowsAsync<Exception>(() => salesService.MarkCarSold(receiptToAdd));
+
         Assert.Equal("Customer profile not found", ex.Message);
     }
 
     [Fact]
-    public void MarkCarSold_InvalidCity_ThrowsException()
+    public async Task MarkCarSold_InvalidCity_ThrowsException()
     {
-        _mockCarRepo.Setup(r => r.GetByVIN(VALID_VIN)).Returns(_realCar);
-        _mockCustomerRepo.Setup(r => r.GetByID(VALID_CUST_ID)).Returns(_realCustomer);
-        _mockReceiptRepo.Setup(r => r.CheckIfSold(VALID_VIN)).Returns(false);
-        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOf(VALID_VIN)).Returns(1);
+        _mockCarRepo.Setup(r => r.GetByVINAsync(VALID_VIN)).ReturnsAsync(_realCar);
+        _mockCustomerRepo.Setup(r => r.GetByIDAsync(VALID_CUST_ID)).ReturnsAsync(_realCustomer);
+        _mockReceiptRepo.Setup(r => r.CheckIfSoldAsync(VALID_VIN)).ReturnsAsync(false);
+        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOfAsync(VALID_VIN)).ReturnsAsync(1);
 
-        var ex = Assert.Throws<Exception>(() => salesService.MarkCarSold(VALID_VIN, VALID_CUST_ID, "Atlantis", 0.99m));
-        Assert.Equal("No location at this city", ex.Message);
+        Receipt receiptToAdd = new Receipt() { VIN = VALID_VIN, CustomerID = VALID_CUST_ID, PickupLocation = 8008135, SellingPrice = 0.99m };
+
+        var ex = await Assert.ThrowsAsync<Exception>(() => salesService.MarkCarSold(receiptToAdd));
+
+        Assert.Equal("Location not found", ex.Message);
     }
 
     [Fact]
-    public void MarkCarSold_CarAlreadySold_ThrowsException()
+    public async Task MarkCarSold_CarAlreadySold_ThrowsException()
     {
-        _mockCarRepo.Setup(r => r.GetByVIN(VALID_VIN)).Returns(_realCar);
-        _mockLocationRepo.Setup(r => r.GetByCity(VALID_CITY)).Returns(_realLocation);
-        _mockCustomerRepo.Setup(r => r.GetByID(VALID_CUST_ID)).Returns(_realCustomer);
-        _mockReceiptRepo.Setup(r => r.CheckIfSold(VALID_VIN)).Returns(true);
-        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOf(VALID_VIN)).Returns(1);
+        _mockCarRepo.Setup(r => r.GetByVINAsync(VALID_VIN)).ReturnsAsync(_realCar);
+        _mockCustomerRepo.Setup(r => r.GetByIDAsync(VALID_CUST_ID)).ReturnsAsync(_realCustomer);
+        _mockLocationRepo.Setup(r => r.GetByIDAsync(VALID_LOCATION_ID)).ReturnsAsync(_realLocation);
+        _mockReceiptRepo.Setup(r => r.CheckIfSoldAsync(VALID_VIN)).ReturnsAsync(true);
+        _mockShipmentRepo.Setup(r => r.GetCurrentLocationIdOfAsync(VALID_VIN)).ReturnsAsync(1);
 
-        var ex = Assert.Throws<Exception>(() => salesService.MarkCarSold(VALID_VIN, VALID_CUST_ID, VALID_CITY, 0.99m));
+        Receipt receiptToAdd = new Receipt() { VIN = VALID_VIN, CustomerID = VALID_CUST_ID, PickupLocation = VALID_LOCATION_ID, SellingPrice = 0.99m };
+
+        var ex = await Assert.ThrowsAsync<Exception>(() => salesService.MarkCarSold(receiptToAdd));
+
         Assert.Equal("Car already sold", ex.Message);
+    }
+
+    [Fact]
+    public async Task ListAllCars_Success_ExpectedBehavior() 
+    {
+        List<Car> carList = new List<Car>();
+        Car car1 = _realCar;
+        Car car2 = new Car() { VIN = "2T1BR32E56C640079", Make = "Toyota", Model = "Corolla", Year = 2006 };
+        carList.Add(car1);
+        carList.Add(car2);
+        _mockCarRepo.Setup(r => r.GetAllCarsAsync()).ReturnsAsync(carList);
+
+        Assert.True(carList.SequenceEqual(await salesService.ListAllCars()));
     }
 }

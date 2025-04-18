@@ -8,7 +8,8 @@ public class Employee {
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public int LocationID { get; set; }
+    public DateTime? StartDate { get; set; }
 
     [Precision(10, 2)]
-    public decimal Salary { get; set; }
+    public decimal? Salary { get; set; }
 }

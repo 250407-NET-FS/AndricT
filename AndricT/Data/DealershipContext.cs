@@ -30,5 +30,4 @@ public class DealershipContext : DbContext
                     .HasForeignKey(e => e.DestinationID)
                     .OnDelete(DeleteBehavior.NoAction);
     }
-
 }   

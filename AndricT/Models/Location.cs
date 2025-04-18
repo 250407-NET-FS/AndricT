@@ -7,8 +7,6 @@ public class Location {
     public string Address { get; set; }
     public string City { get; set; }
 
-    [InverseProperty(nameof(Shipment.Source))]
-    public virtual ICollection<Shipment> SourceForShipments { get; set; }
-    [InverseProperty(nameof(Shipment.Destination))]
-    public virtual ICollection<Shipment> DestinationForShipments { get; set; }
+    public ICollection<Shipment> SourceForShipments;
+    public ICollection<Shipment> DestinationForShipments;
 }

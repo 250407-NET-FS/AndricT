@@ -1,6 +1,6 @@
 using Dealership.Models;
 
 public interface ISalesService {
-    Receipt MarkCarSold(string VIN, int customerId, string shipToCity, decimal sellingPrice);
-    Task<List<Car>> ListAllCars();
+    Task<Receipt> MarkCarSold(Receipt receipt);
+    Task<List<Car>> GetCarStock(string make, string model, int year);
 }

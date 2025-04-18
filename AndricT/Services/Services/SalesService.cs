@@ -17,35 +17,38 @@ public class SalesService : ISalesService {
         _shipmentRepo = shipmentRepo;
     }
 
-    public Receipt MarkCarSold(string vin, int customerId, string shipToCity, decimal sellingPrice) {
-        int? locationID;
+    public async Task<Receipt> MarkCarSold(Receipt receipt) {
+        Car? vinCheck = await _carRepo.GetByVINAsync(receipt.VIN);
+        Customer? customerCheck = await _customerRepo.GetByIDAsync(receipt.CustomerID);
+        Location? locationCheck = await _locationRepo.GetByIDAsync(receipt.PickupLocation);
 
-        if (_carRepo.GetByVINAsync(vin) is null) {
+        if (vinCheck is null) {
             throw new Exception("Car not found");
         }
-        if (_customerRepo.GetByID(customerId) is null) {
+        if (customerCheck is null) {
             throw new Exception("Customer profile not found");
         }
-        if ((locationID = _locationRepo.GetByCity(shipToCity)?.LocationID) is null) {
-            throw new Exception("No location at this city");
+        if (locationCheck is null) {
+            throw new Exception("Location not found");
         }
-        if (_receiptRepo.CheckIfSold(vin)) {
+        if (await _receiptRepo.CheckIfSoldAsync(receipt.VIN)) {
             throw new Exception("Car already sold");
         }
 
-        Receipt r = new Receipt() { VIN = vin, CustomerID = customerId, PickupLocation = (int)locationID, SellingPrice = sellingPrice };
-        _receiptRepo.AddReceipt(r);
+        await _receiptRepo.AddReceiptAsync(receipt);
 
-        int curLocation = _shipmentRepo.GetCurrentLocationIdOf(vin);
-        if (curLocation != locationID) {
-            Shipment s = new Shipment() { VIN = vin, SourceID = curLocation, DestinationID = (int)locationID };
-            _shipmentRepo.AddShipment(s);
+        int curLocation = (int)await _shipmentRepo.GetCurrentLocationIdOfAsync(receipt.VIN);
+        if (curLocation != receipt.PickupLocation) {
+            Shipment s = new Shipment() { VIN = receipt.VIN, SourceID = curLocation, DestinationID = receipt.PickupLocation };
+            await _shipmentRepo.AddShipmentAsync(s);
         }
 
-        return r;
+        return receipt;
     }
 
-    public Task<List<Car>> ListAllCars() {
-        return _carRepo.GetAllCarsAsync();
+    public async Task<List<Car>> GetCarStock(string make, string model, int year) {
+        List<Car> carList = await _carRepo.GetFilteredCarsAsync(make, model, year);
+        List<Receipt> receiptList = await _receiptRepo.GetAllReceiptsAsync();
+        return carList.Where(c => !receiptList.Where(r => r.VIN == c.VIN).Any()).ToList();
     }
 }

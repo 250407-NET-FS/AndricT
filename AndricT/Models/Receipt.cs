@@ -15,7 +15,7 @@ public class Receipt {
     [Precision(10, 2)]
     public decimal SellingPrice { get; set; }
 
-    public virtual Car Car { get; set; }
-    public virtual Customer Customer { get; set; }
-    public virtual Location Location { get; set; }
+    public Car Car;
+    public Customer Customer;
+    public Location Location;
 }

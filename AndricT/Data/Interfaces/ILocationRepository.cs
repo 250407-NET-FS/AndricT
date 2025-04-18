@@ -2,5 +2,6 @@ using Dealership.Models;
 
 public interface ILocationRepository {
     Task<List<Location>> GetAllLocationsAsync();
-    Task<Location?> GetByCityAsync(string city);
+    Task<Location?> GetByIDAsync(int locationID);
+    Task<List<Location>> GetAllInCityAsync(string city);
 }
