@@ -13,7 +13,7 @@ public class ShipmentRepository : IShipmentRepository {
         return await _dbContext.Shipments.ToListAsync();
     }
 
-    public async Task<int?> GetCurrentLocationIdOfAsync(string VIN) {
+    public async Task<int> GetCurrentLocationIdOfAsync(string VIN) {
         var shipments = _dbContext.Shipments.Where(c => c.VIN == VIN);
         return shipments.Any() ? shipments.OrderByDescending(c => c.Date).First().DestinationID : 1;
     }

@@ -37,7 +37,7 @@ public class SalesService : ISalesService {
 
         await _receiptRepo.AddReceiptAsync(receipt);
 
-        int curLocation = (int)await _shipmentRepo.GetCurrentLocationIdOfAsync(receipt.VIN);
+        int curLocation = await _shipmentRepo.GetCurrentLocationIdOfAsync(receipt.VIN);
         if (curLocation != receipt.PickupLocation) {
             Shipment s = new Shipment() { VIN = receipt.VIN, SourceID = curLocation, DestinationID = receipt.PickupLocation };
             await _shipmentRepo.AddShipmentAsync(s);
