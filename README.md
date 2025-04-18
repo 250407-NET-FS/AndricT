@@ -7,10 +7,17 @@ Engineers are available at these locations to help service your car.
 The application gives the user basic create and read abilities for the database entities that it wraps around.
 
 The base endpoints used are:
-* '/Car'
-* '/Customer'
-* '/Employee'
-* '/Location'
-* '/Receipt'
-* '/Service'
-* '/Shipment'
+* `/Car`
+* `/Customer`
+* `/Employee`
+* `/Location`
+* `/Receipt`
+* `/Service`
+* `/Shipment`
+
+# Technologies Used
+* Entity Framework Core
+* SQL Server
+* .NET 9.0
+* Swagger (demo)
+* XUnit (testing)
