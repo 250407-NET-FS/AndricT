@@ -5,3 +5,12 @@ Engineers are available at these locations to help service your car.
 
 # Uses
 The application gives the user basic create and read abilities for the database entities that it wraps around.
+
+The base endpoints used are:
+* '/Car'
+* '/Customer'
+* '/Employee'
+* '/Location'
+* '/Receipt'
+* '/Service'
+* '/Shipment'

@@ -29,4 +29,9 @@ public class ServiceRepository : IServiceRepository {
     public async Task<List<Service>> GetAllBetweenDatesAsync(DateTime start, DateTime end) {
         return await _dbContext.Services.Where(s => s.Date <= end && s.Date >= start)?.ToListAsync()! ?? new List<Service>();
     }
+
+    public async Task CancelService(int serviceId) {
+        _dbContext.Services.Remove(_dbContext.Services.Find(serviceId)!);
+        await _dbContext.SaveChangesAsync();
+    }
 }

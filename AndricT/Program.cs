@@ -69,6 +69,10 @@ app.MapGet("/Locations", async (ILocationRepository locationRepo) => {
     return await locationRepo.GetAllLocationsAsync();
 });
 
+app.MapGet("/Location/{LocationID}/Employees", async (string LocationID, IEmployeeRepository employeeRepo) => {
+    return await employeeRepo.GetAllEmployeesAtAsync(Int32.Parse(LocationID));
+});
+
 app.MapGet("/Receipt/{VIN}", async (string VIN, IReceiptRepository receiptRepo) => {
     return await receiptRepo.GetByVIN(VIN);
 });
@@ -83,6 +87,10 @@ app.MapGet("/Service/Car/{VIN}", async (string VIN, IServiceRepository serviceRe
 
 app.MapPost("/Service", async (MaintenanceRequestDTO maintenanceRequest, IMaintenanceService maintenanceService) => {
     await maintenanceService.ScheduleCarMaintenance(maintenanceRequest);
+});
+
+app.MapDelete("/Service/{ServiceID}", async (string ServiceID, IServiceRepository serviceRepo) => {
+    await serviceRepo.CancelService(Int32.Parse(ServiceID));
 });
 
 app.MapGet("/Shipments", async (IShipmentRepository shipmentRepo) => {
