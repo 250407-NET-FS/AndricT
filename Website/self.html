@@ -3,11 +3,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src="scripts.js" defer></script>
     <title>About Me</title>
 </head>
 <body>
-    <div id="main">
-        <div id="sub">
+    <div class="background">
+        <div class="sub">
             <h1>About Me</h1>
             <p>Hi, my name is Andric Tam.</p>
             <p>I'm a software developer with a bachelor's degree in computer science 
@@ -21,17 +22,24 @@
                 opportunity where I can continue growing my technical skills while contributing to projects that
                 have an impact on the world around me.</p>
             <br>
-            <h2>Random Fact</h2>
+            <h2>Random Facts</h2>
             <ul>
                 <li>I like plushies</li>
                 <li>I can speak Cantonese but am also illiterate in the language</li>
             </ul>
             <h2>Favorite Games</h2>
-            <ul>
+            <ul class="favorites">
                 <li>Elden Ring</li>
                 <li>Lies of P</li>
                 <li>Sekiro</li>
             </ul>
+            <h2>Print a List!</h2>
+            <label for="inputField">Input something to the list:</label>
+            <br>
+            <input type="text" id="inputField"/>
+            <input type="submit" onclick="addToMyList()"/>
+            <br><br>
+            <button id="printlist" type="button" onclick="printMyList()">Print it out!</button>
         </div>
     </div>
 </body>
