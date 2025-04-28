@@ -1,0 +1,15 @@
+#main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+p {
+    font-size: large;
+}
+
+li {
+    font-size: large;
+}
